@@ -1,0 +1,279 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SkillWallet - FidBuddy</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f6f8;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #1f2937;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin-bottom: 5px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 30px auto;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            margin-bottom: 10px;
+            color: #1f2937;
+        }
+
+        .card p {
+            color: #555;
+        }
+
+        .fidbuddy {
+            margin-top: 30px;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-box {
+            height: 250px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .user {
+            background: #e0f2fe;
+            text-align: right;
+        }
+
+        .bot {
+            background: #e5e7eb;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>SkillWallet</h1>
+        <p>Your Digital Skill Management Platform</p>
+    </div>
+
+    <div class="container">
+
+        <div class="cards">
+
+            <div class="card">
+                <h2>🎯 Skills</h2>
+                <p>Manage and showcase your skills.</p>
+            </div>
+
+            <div class="card">
+                <h2>🏆 Achievements</h2>
+                <p>Keep track of your achievements.</p>
+            </div>
+
+            <div class="card">
+                <h2>📜 Certificates</h2>
+                <p>Manage your certificates digitally.</p>
+            </div>
+
+            <div class="card">
+                <h2>💼 SkillWallet</h2>
+                <p>Keep all your skill information in one place.</p>
+            </div>
+
+        </div>
+
+
+        <div class="fidbuddy">
+
+            <h2>🤖 FidBuddy</h2>
+            <p>Ask FidBuddy about your skills and SkillWallet.</p>
+
+            <div class="chat-box" id="chatBox">
+
+                <div class="message bot">
+                    <strong>FidBuddy:</strong>
+                    Hi! 👋 I'm FidBuddy. How can I help you?
+                </div>
+
+            </div>
+
+            <div class="input-area">
+
+                <input
+                    type="text"
+                    id="messageInput"
+                    placeholder="Type your message..."
+                    onkeydown="handleEnter(event)"
+                >
+
+                <button onclick="sendMessage()">
+                    Send
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer">
+        <p>© 2026 SkillWallet | Powered by FidBuddy</p>
+    </div>
+
+
+    <script>
+
+        function handleEnter(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+
+
+        function sendMessage() {
+
+            const input = document.getElementById("messageInput");
+            const chatBox = document.getElementById("chatBox");
+
+            const message = input.value.trim();
+
+            if (message === "") {
+                return;
+            }
+
+            // Display user message
+            chatBox.innerHTML += `
+                <div class="message user">
+                    <strong>You:</strong> ${message}
+                </div>
+            `;
+
+            input.value = "";
+
+
+            // Send message to Flask backend
+            fetch("/fidbuddy", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    message: message
+                })
+
+            })
+
+            .then(response => response.json())
+
+            .then(data => {
+
+                chatBox.innerHTML += `
+                    <div class="message bot">
+                        <strong>FidBuddy:</strong> ${data.reply}
+                    </div>
+                `;
+
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+            })
+
+            .catch(error => {
+
+                chatBox.innerHTML += `
+                    <div class="message bot">
+                        <strong>FidBuddy:</strong>
+                        Sorry, something went wrong.
+                    </div>
+                `;
+
+                console.error(error);
+
+            });
+
+        }
+
+    </script>
+
+</body>
+</html>
